@@ -1,69 +1,68 @@
-<!-- survey.html -->
+<!-- results.html -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第1回 世論調査</title>
+  <title>調査結果</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 2em; max-width: 600px; margin: auto; background: #f4f4f4; }
-    label, select { display: block; margin: 1em 0 0.5em; }
-    button { margin-top: 1em; padding: 0.5em 1em; }
+    body { font-family: sans-serif; padding: 2em; max-width: 800px; margin: auto; background: #fff; }
+    canvas { margin: 2em 0; }
+    button { margin: 1em 0.5em 0 0; padding: 0.5em 1em; }
   </style>
 </head>
 <body>
-  <h1>第1回 世論調査</h1>
-  <form id="surveyForm">
-    <label for="id">あなたの生徒番号を教えてください</label>
-    <select id="id" required>
-      <option value="">選択してください</option>
-      <script>
-        for (let i = 1; i <= 100; i++) {
-          const value = String(i).padStart(3, '0');
-          document.write(`<option value="${value}">${value}</option>`);
-        }
-      </script>
-    </select>
+  <h1>調査結果</h1>
+  <h2>学園の課題（得票数順）</h2>
+  <canvas id="issueChart"></canvas>
 
-    <label for="issue">あなたが最も重要だと考える学園の課題は何ですか？</label>
-    <select id="issue" required>
-      <option value="">選択してください</option>
-      <option value="いじめが増加していること">いじめが増加していること</option>
-      <option value="部活動の予算を拡充すること">部活動の予算を拡充すること</option>
-      <option value="授業の質が低下していること">授業の質が低下していること</option>
-      <option value="学園祭の来場者数が減少していること">学園祭の来場者数が減少していること</option>
-      <option value="制服がダサいこと">制服がダサいこと</option>
-      <option value="校則が厳しすぎること">校則が厳しすぎること</option>
-      <option value="学生食堂の価格が高すぎること">学生食堂の価格が高すぎること</option>
-    </select>
+  <h2>支持候補者（得票数順）</h2>
+  <canvas id="candidateChart"></canvas>
 
-    <label for="candidate">あなたは、どの候補者を支持していますか？</label>
-    <select id="candidate" required>
-      <option value="">選択してください</option>
-      <option value="神崎豪">神崎豪</option>
-      <option value="風馬裕也">風馬裕也</option>
-      <option value="田中和夫">田中和夫</option>
-      <option value="姫島ノエル">姫島ノエル</option>
-    </select>
-
-    <button type="submit">送信</button>
-  </form>
+  <button onclick="resetData()">集計をリセット</button>
 
   <script>
-    document.getElementById('surveyForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const id = document.getElementById('id').value;
-      const issue = document.getElementById('issue').value;
-      const candidate = document.getElementById('candidate').value;
+    const data = JSON.parse(localStorage.getItem('responses') || '[]');
 
-      const response = { id, issue, candidate };
-      const responses = JSON.parse(localStorage.getItem('responses') || '[]');
-      responses.push(response);
-      localStorage.setItem('responses', JSON.stringify(responses));
-      alert('ご協力ありがとうございました！');
-      this.reset();
-    });
+    function getSortedCounts(field) {
+      const counts = {};
+      data.forEach(item => {
+        const key = item[field];
+        counts[key] = (counts[key] || 0) + 1;
+      });
+      return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    }
+
+    function renderChart(canvasId, sortedData, label) {
+      const ctx = document.getElementById(canvasId);
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sortedData.map(([key]) => key),
+          datasets: [{
+            label: label,
+            data: sortedData.map(([, value]) => value),
+            backgroundColor: 'red'
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    renderChart('issueChart', getSortedCounts('issue'), '得票数');
+    renderChart('candidateChart', getSortedCounts('candidate'), '得票数');
+
+    function resetData() {
+      localStorage.removeItem('responses');
+      alert('集計結果をリセットしました。ページをリロードしてください。');
+    }
   </script>
 </body>
 </html>
-
