@@ -4,30 +4,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第1回 世論調査</title>
-  <style>
-    body { font-family: sans-serif; padding: 2em; max-width: 600px; margin: auto; background: #f4f4f4; }
-    label, select { display: block; margin: 1em 0 0.5em; }
-    button { margin-top: 1em; padding: 0.5em 1em; }
-  </style>
+  <title>第1回 学園世論調査</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
-  <h1>第1回 世論調査</h1>
+  <h1>第1回 学園世論調査</h1>
   <form id="surveyForm">
-    <label for="id">あなたの生徒番号を教えてください</label>
-    <select id="id" required>
+    <label>あなたの生徒番号を教えてください：</label>
+    <select name="studentId" required>
       <option value="">選択してください</option>
       <script>
         for (let i = 1; i <= 100; i++) {
-          const value = String(i).padStart(3, '0');
-          document.write(`<option value="${value}">${value}</option>`);
+          const id = i.toString().padStart(3, '0');
+          document.write(`<option value="${id}">${id}</option>`);
         }
       </script>
-    </select>
+    </select><br><br>
 
-    <label for="issue">あなたが最も重要だと考える学園の課題は何ですか？</label>
-    <select id="issue" required>
-      <option value="">選択してください</option>
+    <label>最も重要だと考える学園の課題は？</label><br>
+    <select name="issue" required>
       <option value="いじめが増加していること">いじめが増加していること</option>
       <option value="部活動の予算を拡充すること">部活動の予算を拡充すること</option>
       <option value="授業の質が低下していること">授業の質が低下していること</option>
@@ -35,35 +31,45 @@
       <option value="制服がダサいこと">制服がダサいこと</option>
       <option value="校則が厳しすぎること">校則が厳しすぎること</option>
       <option value="学生食堂の価格が高すぎること">学生食堂の価格が高すぎること</option>
-    </select>
+    </select><br><br>
 
-    <label for="candidate">あなたは、どの候補者を支持していますか？</label>
-    <select id="candidate" required>
-      <option value="">選択してください</option>
+    <label>あなたが支持する候補者は？</label><br>
+    <select name="candidate" required>
       <option value="神崎豪">神崎豪</option>
       <option value="風馬裕也">風馬裕也</option>
       <option value="田中和夫">田中和夫</option>
       <option value="姫島ノエル">姫島ノエル</option>
-    </select>
+    </select><br><br>
 
     <button type="submit">送信</button>
   </form>
 
   <script>
-    document.getElementById('surveyForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const id = document.getElementById('id').value;
-      const issue = document.getElementById('issue').value;
-      const candidate = document.getElementById('candidate').value;
+    const firebaseConfig = {
+      // ★あなたのFirebase設定情報に置き換えてください
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-      const response = { id, issue, candidate };
-      const responses = JSON.parse(localStorage.getItem('responses') || '[]');
-      responses.push(response);
-      localStorage.setItem('responses', JSON.stringify(responses));
-      alert('ご協力ありがとうございました！');
-      this.reset();
+    document.getElementById('surveyForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const data = {
+        studentId: this.studentId.value,
+        issue: this.issue.value,
+        candidate: this.candidate.value
+      };
+      db.ref('responses').push(data).then(() => {
+        alert('回答を送信しました！');
+        this.reset();
+      });
     });
   </script>
 </body>
 </html>
-
