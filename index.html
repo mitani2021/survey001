@@ -1,29 +1,26 @@
-<!-- survey.html -->
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>第1回 学園世論調査</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
   <h1>第1回 学園世論調査</h1>
+
   <form id="surveyForm">
-    <label>あなたの生徒番号を教えてください：</label>
-    <select name="studentId" required>
+    <label>設問1：あなたの生徒番号を教えてください</label><br>
+    <select name="studentID" required>
       <option value="">選択してください</option>
       <script>
         for (let i = 1; i <= 100; i++) {
-          const id = i.toString().padStart(3, '0');
-          document.write(`<option value="${id}">${id}</option>`);
+          let value = String(i).padStart(3, '0');
+          document.write(`<option value="${value}">${value}</option>`);
         }
       </script>
     </select><br><br>
 
-    <label>最も重要だと考える学園の課題は？</label><br>
-    <select name="issue" required>
+    <label>設問2：最も重要な学園の課題は？</label><br>
+    <select name="schoolIssue" required>
       <option value="いじめが増加していること">いじめが増加していること</option>
       <option value="部活動の予算を拡充すること">部活動の予算を拡充すること</option>
       <option value="授業の質が低下していること">授業の質が低下していること</option>
@@ -33,7 +30,7 @@
       <option value="学生食堂の価格が高すぎること">学生食堂の価格が高すぎること</option>
     </select><br><br>
 
-    <label>あなたが支持する候補者は？</label><br>
+    <label>設問3：あなたは、どの候補者を支持していますか？</label><br>
     <select name="candidate" required>
       <option value="神崎豪">神崎豪</option>
       <option value="風馬裕也">風馬裕也</option>
@@ -45,28 +42,20 @@
   </form>
 
   <script>
-    const firebaseConfig = {
-      // ★あなたのFirebase設定情報に置き換えてください
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    document.getElementById('surveyForm').addEventListener('submit', function(e) {
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxGrgHxm0V6VxsPqL18J7wxWE-x_8G7jmEGVh7uhp7Xp7GwfEmcEJBfh2LIEYpXinoA/exec";
+    document.getElementById("surveyForm").addEventListener("submit", function (e) {
       e.preventDefault();
+      const formData = new FormData(this);
       const data = {
-        studentId: this.studentId.value,
-        issue: this.issue.value,
-        candidate: this.candidate.value
+        studentID: formData.get("studentID"),
+        schoolIssue: formData.get("schoolIssue"),
+        candidate: formData.get("candidate")
       };
-      db.ref('responses').push(data).then(() => {
-        alert('回答を送信しました！');
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }).then(() => {
+        alert("送信が完了しました！");
         this.reset();
       });
     });
