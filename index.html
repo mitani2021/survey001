@@ -1,77 +1,63 @@
+<!-- survey.html -->
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第1回 学園世論調査</title>
+  <title>三谷学園 世論調査</title>
 </head>
 <body>
-  <h1>第1回 学園世論調査</h1>
-
-  <form id="surveyForm">
-    <label>設問1：あなたの生徒番号を教えてください</label><br>
-    <select id="studentId" required>
+  <h1>三谷学園 第1回 世論調査</h1>
+  <form id="survey-form">
+    <label for="studentId">生徒番号：</label>
+    <select id="studentId" name="studentId">
       <option value="">選択してください</option>
+      <!-- options 001〜100 -->
+      <script>
+        for (let i = 1; i <= 100; i++) {
+          const val = i.toString().padStart(3, '0');
+          document.write(`<option value="${val}">${val}</option>`);
+        }
+      </script>
     </select><br><br>
 
-    <label>設問2：あなたが最も重要だと考える学園の課題は何ですか？</label><br>
-    <select id="issue" required>
-      <option value="">選択してください</option>
-      <option value="いじめが増加していること">1. いじめが増加していること</option>
-      <option value="部活動の予算を拡充すること">2. 部活動の予算を拡充すること</option>
-      <option value="授業の質が低下していること">3. 授業の質が低下していること</option>
-      <option value="学園祭の来場者数が減少していること">4. 学園祭の来場者数が減少していること</option>
-      <option value="制服がダサいこと">5. 制服がダサいこと</option>
-      <option value="校則が厳しすぎること">6. 校則が厳しすぎること</option>
-      <option value="学生食堂の価格が高すぎること">7. 学生食堂の価格が高すぎること</option>
+    <label for="issue">最も重要な学園の課題：</label><br>
+    <select id="issue" name="issue">
+      <option value="いじめが増加していること">いじめが増加していること</option>
+      <option value="部活動の予算を拡充すること">部活動の予算を拡充すること</option>
+      <option value="授業の質が低下していること">授業の質が低下していること</option>
+      <option value="学園祭の来場者数が減少していること">学園祭の来場者数が減少していること</option>
+      <option value="制服がダサいこと">制服がダサいこと</option>
+      <option value="校則が厳しすぎること">校則が厳しすぎること</option>
+      <option value="学生食堂の価格が高すぎること">学生食堂の価格が高すぎること</option>
     </select><br><br>
 
-    <label>設問3：あなたは、どの候補者を支持していますか？</label><br>
-    <select id="candidate" required>
-      <option value="">選択してください</option>
-      <option value="神崎豪">1. 神崎豪</option>
-      <option value="風馬裕也">2. 風馬裕也</option>
-      <option value="田中和夫">3. 田中和夫</option>
-      <option value="姫島ノエル">4. 姫島ノエル</option>
+    <label for="candidate">支持する候補者：</label><br>
+    <select id="candidate" name="candidate">
+      <option value="神崎豪">神崎豪</option>
+      <option value="風馬裕也">風馬裕也</option>
+      <option value="田中和夫">田中和夫</option>
+      <option value="姫島ノエル">姫島ノエル</option>
     </select><br><br>
 
     <button type="submit">送信</button>
   </form>
 
   <script>
-    // 生徒番号プルダウンを生成
-    const studentSelect = document.getElementById("studentId");
-    for (let i = 1; i <= 100; i++) {
-      let value = String(i).padStart(3, '0');
-      let option = document.createElement("option");
-      option.value = value;
-      option.textContent = value;
-      studentSelect.appendChild(option);
-    }
-
-    // 送信処理
-    document.getElementById("surveyForm").addEventListener("submit", async function (e) {
+    const form = document.getElementById('survey-form');
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
-
-      const data = {
-        studentId: document.getElementById("studentId").value,
-        issue: document.getElementById("issue").value,
-        candidate: document.getElementById("candidate").value
-      };
-
-      try {
-        await fetch("https://script.google.com/macros/s/AKfycbzBQqSIIa0Cg3l8ZRBWS8xU5W7XSjsrkNEObPfngtPIbnUd1hf4lj4LaMrWp62f7D1aAA/exec", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-          mode: "no-cors"
-        });
-        alert("ご回答ありがとうございました！");
-        document.getElementById("surveyForm").reset();
-      } catch (error) {
-        alert("送信中にエラーが発生しました");
-        console.error(error);
+      const data = new FormData(form);
+      const params = new URLSearchParams();
+      for (const pair of data.entries()) {
+        params.append(pair[0], pair[1]);
       }
+      await fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+        method: 'POST',
+        body: params
+      });
+      alert('送信が完了しました！');
+      form.reset();
     });
   </script>
 </body>
